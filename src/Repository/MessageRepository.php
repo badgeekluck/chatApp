@@ -29,7 +29,6 @@ class MessageRepository extends ServiceEntityRepository
         $qb
             ->where('m.conservations = :conversationId')
             ->setParameter('conversationId', $conversationId)
-            ->orderBy('m.id', 'DESC')
         ;
 
         return $qb->getQuery()->getResult();
