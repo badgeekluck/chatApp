@@ -2,23 +2,22 @@
 
 namespace App\Entity;
 
-use App\Repository\ParticipantRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=ParticipantRepository::class)
+ * @ORM\Entity(repositoryClass="App\Repository\ParticipantRepository")
  */
 class Participant
 {
     /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="participants" )
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="participants")
      */
     private $user;
 
@@ -32,36 +31,27 @@ class Participant
         return $this->id;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getUser()
+    public function getUser(): ?User
     {
         return $this->user;
     }
 
-    /**
-     * @param mixed $user
-     */
-    public function setUser($user): void
+    public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getConversation()
+    public function getConversation(): ?Conversation
     {
         return $this->conversation;
     }
 
-    /**
-     * @param mixed $conversation
-     */
-    public function setConversation($conversation): void
+    public function setConversation(?Conversation $conversation): self
     {
         $this->conversation = $conversation;
-    }
 
+        return $this;
+    }
 }

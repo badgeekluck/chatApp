@@ -25,7 +25,7 @@ class ParticipantRepository extends ServiceEntityRepository
         $qb->
         where(
             $qb->expr()->andX(
-                $qb->expr()->eq('p.conversation', ':conversationID'),
+                $qb->expr()->eq('p.conversation', ':conversationId'),
                 $qb->expr()->neq('p.user', ':userId')
             )
         )
