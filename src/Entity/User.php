@@ -2,18 +2,24 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @ORM\Entity
+ * @UniqueEntity(fields="email", message="Email already taken")
+ * @UniqueEntity(fields="username", message="Username already taken")
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
 class User implements UserInterface
 {
     /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -22,6 +28,13 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=180, unique=true)
      */
     private $username;
+
+    /**
+     * @ORM\Column(type="string", length=255, unique=true)
+     * @Assert\NotBlank()
+     * @Assert\Email()
+     */
+    private $email;
 
     /**
      * @ORM\Column(type="json")
@@ -44,11 +57,54 @@ class User implements UserInterface
      */
     private $password;
 
+    /**
+     * @Assert\NotBlank()
+     * @Assert\Length(max=4096)
+     */
+    private $plainPassword;
+
+    public function __construct()
+    {
+        $this->participants = new ArrayCollection();
+        $this->messages = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    /**
+     * @param mixed $email
+     */
+    public function setEmail($email): void
+    {
+        $this->email = $email;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPlainPassword()
+    {
+        return $this->plainPassword;
+    }
+
+    /**
+     * @param mixed $plainPassword
+     */
+    public function setPlainPassword($plainPassword): void
+    {
+        $this->plainPassword = $plainPassword;
+    }
     /**
      * A visual identifier that represents this user.
      *
@@ -106,6 +162,7 @@ class User implements UserInterface
     public function getSalt()
     {
         // not needed when using the "bcrypt" algorithm in security.yaml
+        return null;
     }
 
     /**
@@ -118,35 +175,64 @@ class User implements UserInterface
     }
 
     /**
-     * @return mixed
+     * @return Collection|Participant[]
      */
-    public function getParticipants()
+    public function getParticipants(): Collection
     {
         return $this->participants;
     }
 
-    /**
-     * @param mixed $participants
-     */
-    public function setParticipants($participants): void
+    public function addParticipant(Participant $participant): self
     {
-        $this->participants = $participants;
+        if (!$this->participants->contains($participant)) {
+            $this->participants[] = $participant;
+            $participant->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipant(Participant $participant): self
+    {
+        if ($this->participants->contains($participant)) {
+            $this->participants->removeElement($participant);
+            // set the owning side to null (unless already changed)
+            if ($participant->getUser() === $this) {
+                $participant->setUser(null);
+            }
+        }
+
+        return $this;
     }
 
     /**
-     * @return mixed
+     * @return Collection|Message[]
      */
-    public function getMessages()
+    public function getMessages(): Collection
     {
         return $this->messages;
     }
 
-    /**
-     * @param mixed $messages
-     */
-    public function setMessages($messages): void
+    public function addMessage(Message $message): self
     {
-        $this->messages = $messages;
+        if (!$this->messages->contains($message)) {
+            $this->messages[] = $message;
+            $message->setUser($this);
+        }
+
+        return $this;
     }
 
+    public function removeMessage(Message $message): self
+    {
+        if ($this->messages->contains($message)) {
+            $this->messages->removeElement($message);
+            // set the owning side to null (unless already changed)
+            if ($message->getUser() === $this) {
+                $message->setUser(null);
+            }
+        }
+
+        return $this;
+    }
 }

@@ -130,12 +130,10 @@ class MessageController extends AbstractController
         $update = new Update(
             [
                 sprintf("/conversations/%s", $conversation->getId()),
-                sprintf("/conversations/%s", $recipient->getUser()->getUserName())
+                sprintf("/conversations/%s", $recipient->getUser()->getUsername()),
             ],
             $messageSerialized,
-            [
-                sprintf("/%s", $recipient->getUser()->getUserName())
-            ]
+            true
         );
 
         $this->publisher->__invoke($update);
